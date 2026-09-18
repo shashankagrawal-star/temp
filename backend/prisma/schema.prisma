@@ -1,0 +1,82 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  googleId  String   @unique
+  email     String   @unique
+  name      String
+  avatarUrl String?
+  createdAt DateTime @default(now())
+
+  senders           Sender[]
+  emailJobs         EmailJob[]
+  slackIntegration  SlackIntegration?
+}
+
+model Sender {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fromEmail  String
+  fromName   String?
+  smtpHost   String
+  smtpPort   Int
+  smtpUser   String
+  smtpPass   String
+  // Per-sender overrides of the global rate-limit env defaults; null = use env default.
+  hourlyLimitOverride  Int?
+  minDelayMsOverride   Int?
+  createdAt  DateTime @default(now())
+
+  emailJobs EmailJob[]
+
+  @@index([userId])
+}
+
+enum EmailStatus {
+  scheduled
+  processing
+  sent
+  failed
+}
+
+model EmailJob {
+  id             String      @id @default(uuid())
+  userId         String
+  user           User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  senderId       String
+  sender         Sender      @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  batchId        String
+  recipientEmail String
+  subject        String
+  body           String       @db.Text
+  scheduledAt    DateTime
+  status         EmailStatus  @default(scheduled)
+  sentAt         DateTime?
+  errorMessage   String?
+  bullJobId      String?      @unique
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@index([userId, status])
+  @@index([senderId, status])
+  @@index([batchId])
+}
+
+model SlackIntegration {
+  id          String   @id @default(uuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken String
+  webhookUrl  String
+  channel     String?
+  teamName    String?
+  createdAt   DateTime @default(now())
+}
