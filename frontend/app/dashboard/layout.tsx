@@ -4,8 +4,9 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import type { User } from "@/lib/types";
-import { Header } from "@/components/Header";
+import { Sidebar } from "@/components/Sidebar";
 import { ToastProvider } from "@/components/ui/Toast";
+import { DashboardProvider } from "@/lib/DashboardContext";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -21,16 +22,18 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }, [router]);
 
   if (!checked) {
-    return <div className="flex min-h-screen items-center justify-center text-gray-400">Loading…</div>;
+    return <div className="flex min-h-screen items-center justify-center text-ink-subtle">Loading…</div>;
   }
   if (!user) return null;
 
   return (
     <ToastProvider>
-      <div className="min-h-screen bg-gray-50">
-        <Header user={user} />
-        <main className="mx-auto max-w-6xl px-6 py-8">{children}</main>
-      </div>
+      <DashboardProvider>
+        <div className="flex h-screen bg-canvas">
+          <Sidebar user={user} />
+          <main className="flex-1 overflow-y-auto">{children}</main>
+        </div>
+      </DashboardProvider>
     </ToastProvider>
   );
 }

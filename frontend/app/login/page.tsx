@@ -1,16 +1,26 @@
-import { api } from "@/lib/api";
+"use client";
 
-export default function LoginPage() {
+import { FormEvent } from "react";
+import { api } from "@/lib/api";
+import { useToast } from "@/components/ui/Toast";
+import { ToastProvider } from "@/components/ui/Toast";
+
+function LoginCard() {
+  const { showToast } = useToast();
+
+  function handlePasswordSubmit(e: FormEvent) {
+    e.preventDefault();
+    showToast("Email/password sign-in isn't available yet — please continue with Google.", "error");
+  }
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center gap-6 px-4">
-      <div className="w-full max-w-sm rounded-2xl border border-gray-200 bg-white p-8 text-center shadow-sm">
-        <h1 className="mb-1 text-xl font-semibold text-gray-900">ReachInbox Scheduler</h1>
-        <p className="mb-6 text-sm text-gray-500">
-          Sign in to schedule and track your cold email campaigns.
-        </p>
+    <main className="flex min-h-screen flex-col items-center justify-center bg-canvas px-4">
+      <div className="w-full max-w-sm rounded-2xl border border-line bg-surface p-8 shadow-card">
+        <h1 className="mb-6 text-center text-3xl font-bold text-ink">Login</h1>
+
         <a
           href={api.googleLoginUrl()}
-          className="flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+          className="flex w-full items-center justify-center gap-2 rounded-lg bg-brand-50 px-4 py-3 text-sm font-medium text-ink hover:bg-brand-100"
         >
           <svg width="18" height="18" viewBox="0 0 18 18">
             <path
@@ -30,9 +40,42 @@ export default function LoginPage() {
               d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0A9 9 0 0 0 .95 4.97l3 2.33C4.66 5.17 6.65 3.58 9 3.58z"
             />
           </svg>
-          Sign in with Google
+          Login with Google
         </a>
+
+        <div className="my-5 flex items-center gap-3 text-xs text-ink-subtle">
+          <span className="h-px flex-1 bg-line" />
+          or sign up through email
+          <span className="h-px flex-1 bg-line" />
+        </div>
+
+        <form onSubmit={handlePasswordSubmit} className="flex flex-col gap-3">
+          <input
+            type="email"
+            placeholder="Email ID"
+            className="w-full rounded-lg border border-line bg-canvas px-3 py-2.5 text-sm text-ink outline-none placeholder:text-ink-subtle focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            className="w-full rounded-lg border border-line bg-canvas px-3 py-2.5 text-sm text-ink outline-none placeholder:text-ink-subtle focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
+          />
+          <button
+            type="submit"
+            className="mt-2 w-full rounded-lg bg-brand-600 py-2.5 text-sm font-semibold text-white hover:bg-brand-700"
+          >
+            Login
+          </button>
+        </form>
       </div>
     </main>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <ToastProvider>
+      <LoginCard />
+    </ToastProvider>
   );
 }
